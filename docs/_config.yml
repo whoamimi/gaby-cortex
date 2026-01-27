@@ -3,7 +3,6 @@ title: "DataBy AI Docs"
 remote_theme: just-the-docs/just-the-docs # "mmistakes/minimal-mistakes@4.24.0"
 logo: /assets/logo.svg
 description: "Documentation for DataBy AI"
-minimal_mistakes_skin: "dark"
 
 author: Mimi Phan
 email: phan.mimi@outlook.com
