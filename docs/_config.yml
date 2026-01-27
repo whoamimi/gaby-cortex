@@ -27,6 +27,13 @@ mermaid:
   version: "10.6.0"
   theme: "neo-dark"
 
+toc: true
+toc_label: "Content"
+toc_icon: "cog"
+classes: wide
+lasyout: default
+minimal_mistakes_skin: "dark"
+
 header:
   title: "DataBy AI Documentation"
   logo: /assets/logo.svg
@@ -34,11 +41,6 @@ header:
 
 sidebar:
   nav: "docs"
-  position: left
-  collapsible: true
-  collapsed_by_default: false
-  index_sidebar: true
-  search_sidebar: true
 
 aux_links:
   DataBy AI App:
@@ -50,6 +52,7 @@ aux_links:
   Wordpress:
     url: https://mimiphanblog.wordpress.com/
     icon: fas fa-blog
+
 aux_links_position: top
 aux_links_style: icons
 
