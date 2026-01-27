@@ -21,10 +21,6 @@ mermaid:
   version: "10.6.0"
   theme: "neo-dark"
 
-sidebar:
-  logo: /assets/logo.svg
-  title: "DataBy AI Docs"
-
 aux_links:
   DataBy AI App: https://databy.ai
   Github: https://github.com/whoamimi/databy-ai
@@ -87,3 +83,13 @@ just_the_docs:
     twitter_username: whoamimi
     facebook_app_id: ""
     linkedin_username: ""
+
+  sidebar:
+    collapsible: true
+    collapsed_by_default: false
+    show_on_posts: true
+    show_on_docs: true
+    show_on_pages: true
+    title: "DataBy AI Docs"
+    logo: "/assets/logo.svg"
+    search_bar: true
