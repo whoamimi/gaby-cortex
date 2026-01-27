@@ -3,6 +3,9 @@
 title: AI Agent Architecture
 nav_order: 1
 description: AI/ML Dev Notes
+layout: single
+sidebar:
+  nav: "docs"
 
 ---
 
@@ -22,7 +25,7 @@ All AI Agents are built by inheriting `AgentBasement` Object class.
 
 ## **Pipelines**
 
-All Pipelines and workflows are built by inheriting `AgentPipeline` which inherits `OrderedDict`. The inheritance between 
+All Pipelines and workflows are built by inheriting `AgentPipeline` which inherits `OrderedDict`. The inheritance between
 
 
 # **From User Event Driven Point-of-view**
