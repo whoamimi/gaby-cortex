@@ -67,5 +67,27 @@ plugins:
   - jekyll-paginate
   - jekyll-sitemap
 
+navbar:
+  title: "DataBy AI Docs"
+  logo: /assets/logo.svg
+  links:
+    - title: "Home"
+      url: /databy-ai/
+      internal: true
+    - title: "AI & Data Science"
+      url: /databy-ai/pages/1_ai_agents/
+      internal: true
+  fixed: true
+  collapsible: true
+  collapsed_by_default: false
+  show_downloads: true
+
 footer_content: "Copyright &copy; 2025 DataBy AI. Distributed under the <a href=\"https://github.com/whoamimi/databy-ai/blob/main/LICENSE\">MIT License</a>."
+last_edit_timestamp: true
+last_edit_time_format: "%b %e %Y at %I:%M %p"
+gh_edit_link: false
+gh_edit_repository: "https://github.com/whoamimi/databy-ai"
+gh_edit_branch: "main"
+gh_edit_source: docs
+gh_edit_view_mode: "tree"
 
