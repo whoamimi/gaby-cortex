@@ -62,10 +62,7 @@ collections:
 just_the_docs:
   collections:
     posts:
-      enabled: true
       name: Documentation
-      nav_order: 1
-      nav_fold: true
 
   search_enabled: true
   toc:
@@ -93,3 +90,6 @@ just_the_docs:
     title: "DataBy AI Docs"
     logo: "/assets/logo.svg"
     search_bar: true
+
+back_to_top: true
+back_to_top_text: "Back to top"

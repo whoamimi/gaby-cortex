@@ -1,8 +1,9 @@
 ---
 
 title: AI Agent Architecture
-nav_order: 1
+nav_order: 2
 description: AI/ML Dev Notes
+collections:
 
 ---
 
