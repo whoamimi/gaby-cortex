@@ -1,7 +1,7 @@
 ---
 title: Home
 layout: default 
-
+nav_order: 0
 ---
 
 # DataBy AI Docs

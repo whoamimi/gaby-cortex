@@ -1,6 +1,6 @@
 
 title: "DataBy AI Docs"
-remote_theme: pmarsceill/just-the-docs
+remote_theme: cotes2020/jekyll-theme-chirpy
 logo: /assets/logo.svg
 color_scheme: light
 
@@ -32,8 +32,17 @@ sidebar:
   - AI & Data Science: pages/1_ai_agents.md
 
 aux_links:
-  App: https://databy.ai
-  Github: https://github.com/whoamimi/databy-ai
+  DataBy AI App: 
+    url: https://databy.ai
+    icon: fas fa-robot
+
+  Github: 
+    url: https://github.com/whoamimi/databy-ai
+    icon: fab fa-github
+
+  Wordpress: 
+    url: https://mimiphanblog.wordpress.com/
+    icon: fas fa-blog
 
 exclude:
   - CHANGELOG.md
@@ -51,11 +60,4 @@ plugins:
   - jekyll-sitemap
 
 footer_content: "Copyright &copy; 2025 DataBy AI. Distributed under the <a href=\"https://github.com/whoamimi/databy-ai/blob/main/LICENSE\">MIT License</a>."
-footer_social:
-  - title: "GitHub"
-    url: "https://github.com/whoamimi/"
-    icon: "fab fa-github"
-  - title: "Blog"
-    url: "https://mimiphanblog.wordpress.com/"
-    icon: "fas fa-blog"
 
