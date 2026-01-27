@@ -3,9 +3,6 @@
 title: AI Agent Architecture
 nav_order: 1
 description: AI/ML Dev Notes
-layout: single
-sidebar:
-  nav: "docs"
 
 ---
 
