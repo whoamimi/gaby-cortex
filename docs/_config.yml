@@ -27,17 +27,13 @@ mermaid:
   version: "10.6.0"
   theme: "neo-dark"
 
-show_downloads: true
-defaults:
-  -
-    scope:
-      path: "/pages"
-      type: "docs"
-    values:
-      layout: "default"
+header:
+  title: "DataBy AI Documentation"
+  logo: /assets/logo.svg
+  tagline: "Blogs on building Autonomous AI Data Agent."
 
 sidebar:
-  nav: "_data/navigation.yml"
+  nav: "docs"
   position: left
   collapsible: true
   collapsed_by_default: false

@@ -3,7 +3,14 @@ main:
     url: /databy-ai/
 
 docs:
-  - title: "Home"
-    url: /databy-ai/
-  - title: "AI & Data Science"
-    url: /databy-ai/pages/1_ai_agents/
+  - title: Home
+    children:
+      url: /
+  - title: "AI/ML & Data Science"
+    children:
+      - title: "AI Agent Architecture"
+        url: /docs/1_ai_agents/
+  - title: "Software Development"
+    children:
+      - title: "Software Development Overview"
+        url: /docs/2_software_development/
