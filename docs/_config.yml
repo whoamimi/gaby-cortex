@@ -23,7 +23,7 @@ mermaid:
 toc: true
 toc_label: "Content"
 toc_icon: "cog"
-classes: wide
+toc_inline: true
 
 sidebar:
   position: left
@@ -34,13 +34,10 @@ sidebar:
 aux_links:
   DataBy AI App:
     - https://databy.ai
-    - fas fa-robot
   Github:
     - https://github.com/whoamimi/databy-ai
-    - fab fa-github
   Wordpress:
     - https://mimiphanblog.wordpress.com/
-    - fas fa-blog
 aux_links_position: top
 aux_links_style: icons
 
