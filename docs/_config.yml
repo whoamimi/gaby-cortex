@@ -1,6 +1,6 @@
 
 title: "DataBy AI Docs"
-remote_theme: mmistakes/minimal-mistakes
+theme: cotes2020/jekyll-theme-chirpy
 logo: /assets/logo.svg
 color_scheme: dark
 author: Mimi Phan 
