@@ -3,6 +3,7 @@ title: "DataBy AI Docs"
 remote_theme: mmistakes/minimal-mistakes
 logo: /assets/logo.svg
 color_scheme: light
+description: "Documentation for DataBy AI"
 
 author: Mimi Phan
 email: phan.mimi@outlook.com
@@ -36,8 +37,12 @@ defaults:
       layout: "default"
 
 sidebar:
-  Home: index.md
-  AI & Data Science: pages/1_ai_agents.md
+  nav: "_data/navigation.yml"
+  position: left
+  collapsible: true
+  collapsed_by_default: false
+  index_sidebar: true
+  search_sidebar: true
 
 aux_links:
   DataBy AI App:
