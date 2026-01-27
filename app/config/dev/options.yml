@@ -1,0 +1,31 @@
+# app/config/options.yml
+# Configuration options for various categories used in the application. Shared with Frontend and Backend.
+
+dataPlatformTypes:
+  - huggingface
+  - kaggle
+  - local-upload
+  - s3-bucket
+  - google-drive
+  - demo-platform
+
+dataTypes:
+  - tabular/parquet/csv/excel/json
+  - image/jpg/png/jpeg
+  - endpoint
+  - document/pdf/jpg/png
+  - demo-data
+
+databaseTypes:
+  - postgresql
+  - mysql
+  - mongodb
+  - redshift
+  - bigquery
+  - demo-db
+
+eventStages:
+  - data-ingestion
+  - data-cleaning
+  - data-analytics
+  - data-quality-check

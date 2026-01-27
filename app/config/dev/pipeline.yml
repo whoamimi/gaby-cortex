@@ -1,0 +1,70 @@
+# app/config/dev/pipeline.yml
+# Configuration file for development pipeline settings
+
+data-discovery:
+  stages:
+    - name: profiling
+      prompt: "Given the dataset's objective and data model summary, Return the description of the data column fields and their data types."
+    - name: data-type-identifier
+      prompt: "Identify and classify the data types of each column in the dataset, such as integer, float, string, date, categorical, boolean, etc."
+
+data-structuring:
+  requirement:
+    name: nested-data-detection
+    prompt: "Whether nested data exists in either of the columns"
+
+  stages:
+    - name: reshaping
+      prompt: "Restructure the data by pivoting, melting, or transposing as needed to convert it into the optimal format for analysis."
+
+    - name: parsing
+      prompt: "Extract and parse structured data from nested formats like JSON, XML, or delimited strings into separate columns."
+
+    - name: unnesting
+      prompt: "Flatten hierarchical or nested data structures into a tabular format, creating separate columns for each nested field."
+
+    - name: splitting-combining-columns
+      prompt: "Split multi-value columns into separate fields or combine related columns into single consolidated fields based on logical groupings."
+
+data-wrangling:
+  requirement:
+    name: missing-values-detection
+    prompt: "Whether missing values exist in either of the columns"
+
+  stages:
+    - name: missing-values-handling
+      prompt: "Identify all missing values in the dataset and apply appropriate strategies such as imputation, deletion, or flagging based on missingness patterns."
+
+    - name: deduplication
+      prompt: "Detect and remove duplicate records from the dataset, keeping the most complete or recent version of each unique entry."
+
+    - name: outlier-detection
+      prompt: "Identify outliers and anomalous values using statistical methods, then flag or handle them according to whether they represent errors or valid extreme cases."
+
+data-transformation:
+  stages:
+    - name: data-type-conversion
+      prompt: "Convert columns to their appropriate data types, handling strings to numbers, dates, booleans, or categorical types as needed."
+
+    - name: encoding
+      prompt: "Encode categorical variables using one-hot encoding, label encoding, or ordinal encoding based on the variable type and analysis requirements."
+
+    - name: scaling-normalization
+      prompt: "Apply scaling or normalization techniques such as min-max scaling, standardization, or robust scaling to numeric features."
+
+    - name: binning-discretization
+      prompt: "Convert continuous numeric variables into categorical bins or discrete intervals using equal-width, equal-frequency, or custom binning strategies."
+
+data-enrichment:
+  stages:
+    - name: feature-engineering
+      prompt: "Create new derived features from existing columns using domain knowledge, mathematical operations, or feature interactions to enhance predictive power."
+
+    - name: calculated-fields
+      prompt: "Generate calculated fields by applying formulas, business logic, or transformations to existing columns to create meaningful derived metrics."
+
+    - name: relationship-mapping
+      prompt: "Establish and document relationships between entities, creating foreign key mappings and identifying hierarchical or network structures in the data."
+
+    - name: dimensionality-reduction
+      prompt: "Apply dimensionality reduction techniques such as PCA, feature selection, or correlation analysis to reduce the number of variables while preserving information."

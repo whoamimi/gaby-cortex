@@ -1,0 +1,48 @@
+
+title: "DataBy AI Docs"
+theme: jekyll-theme-cayman
+author: Mimi Phan 
+email: phan.mimi@outlook.com 
+markdown: kramdown
+timezone: "Australia/Sydney"
+
+url: https://whoamimi.github.io
+baseurl: /databy-ai
+repository: whoamimi/databy-ai
+
+mermaid:
+  version: "10.6.0"
+
+# Custom CSS for dark theme
+defaults:
+  -
+    scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "default"
+
+nav:
+  - Home: index.md
+
+aux_links:
+  App:
+    - https://databy.ai
+  Github:
+    - https://github.com/whoamimi/databy-ai
+
+exclude:
+  - CHANGELOG.md
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - README.md
+  - screenshot.png
+
+plugins:
+
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-paginate
+  - jekyll-sitemap

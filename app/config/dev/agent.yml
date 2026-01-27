@@ -1,0 +1,7 @@
+# app/config/agent.yml
+# Configuration for agent settings in development environment.
+
+data-ingestion: null
+data-cleaning: pipeline.yml
+data-analytics: null
+data-quality: null
