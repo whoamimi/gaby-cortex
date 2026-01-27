@@ -61,11 +61,33 @@ gh_edit_branch: "main"
 gh_edit_source: docs
 gh_edit_view_mode: "tree"
 
+
 collections:
-  docs:
-    output: true
-    permalink: /:collection/:path/
   posts:
     output: true
-    permalink: /posts/:path/
+    permalink: "/:collection/:path/"
 
+just_the_docs:
+  collections:
+    posts:
+      enabled: true
+      name: Documentation
+      nav_order: 1
+      nav_fold: true
+
+  search_enabled: true
+  toc:
+    min_level: 2
+    max_level: 4
+  show_toc_on_pages: true
+  show_toc_on_posts: false
+  show_toc_on_docs: true
+  toc_sticky: true
+  toc_collapsible: true
+  toc_collapsed_by_default: false
+
+  social_sharing:
+    enabled: true
+    twitter_username: whoamimi
+    facebook_app_id: ""
+    linkedin_username: ""
