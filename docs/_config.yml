@@ -3,6 +3,7 @@ title: "DataBy AI Docs"
 remote_theme: just-the-docs/just-the-docs # "mmistakes/minimal-mistakes@4.24.0"
 logo: /assets/logo.svg
 description: "Documentation for DataBy AI"
+color_scheme: light
 
 author: Mimi Phan
 email: phan.mimi@outlook.com
@@ -59,17 +60,8 @@ plugins:
 navbar:
   title: "DataBy AI Docs"
   logo: /assets/logo.svg
-  links:
-    - title: "Home"
-      url: /databy-ai/
-      internal: true
-    - title: "AI & Data Science"
-      url: /databy-ai/pages/1_ai_agents/
-      internal: true
-  fixed: true
   collapsible: true
   collapsed_by_default: false
-  show_downloads: true
 
 footer_content: "Copyright &copy; 2025 DataBy AI. Distributed under the <a href=\"https://github.com/whoamimi/databy-ai/blob/main/LICENSE\">MIT License</a>."
 last_edit_timestamp: true
