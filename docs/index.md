@@ -1,12 +1,13 @@
 ---
 title: Home
-layout: default 
+layout: default
 nav_order: 0
+
 ---
 
 # DataBy AI Docs
 
-Welcome to DataBy AI Docs on building autonomous AI Data Engineer. 
+Welcome to DataBy AI Docs on building autonomous AI Data Engineer.
 
 **Key Features**
 

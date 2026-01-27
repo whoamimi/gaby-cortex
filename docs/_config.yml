@@ -4,10 +4,19 @@ remote_theme: mmistakes/minimal-mistakes
 logo: /assets/logo.svg
 color_scheme: light
 
-author: Mimi Phan 
-email: phan.mimi@outlook.com 
-markdown: kramdown
+author: Mimi Phan
+email: phan.mimi@outlook.com
 timezone: "Australia/Sydney"
+markdown: kramdown
+highlighter: rouge
+breadcrumbs: true
+heading_anchors: false
+incremental: true
+paginate: 10
+enable_copy_code_button: true
+inline_toc: true
+pagination_previous: "Previous"
+pagination_next: "Next"
 
 url: https://whoamimi.github.io
 baseurl: /databy-ai
@@ -18,7 +27,6 @@ mermaid:
   theme: "neo-dark"
 
 show_downloads: true
-# Custom CSS for dark theme
 defaults:
   -
     scope:
@@ -28,21 +36,21 @@ defaults:
       layout: "default"
 
 sidebar:
-  - Home: index.md
-  - AI & Data Science: pages/1_ai_agents.md
+  Home: index.md
+  AI & Data Science: pages/1_ai_agents.md
 
 aux_links:
-  DataBy AI App: 
+  DataBy AI App:
     url: https://databy.ai
     icon: fas fa-robot
-
-  Github: 
+  Github:
     url: https://github.com/whoamimi/databy-ai
     icon: fab fa-github
-
-  Wordpress: 
+  Wordpress:
     url: https://mimiphanblog.wordpress.com/
     icon: fas fa-blog
+aux_links_position: top
+aux_links_style: icons
 
 exclude:
   - CHANGELOG.md
