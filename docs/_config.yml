@@ -25,10 +25,6 @@ sidebar:
   logo: /assets/logo.svg
   title: "DataBy AI Docs"
 
-navbar:
-  title: "DataBy AI Docs"
-  logo: /assets/logo.svg
-
 aux_links:
   DataBy AI App: https://databy.ai
   Github: https://github.com/whoamimi/databy-ai
