@@ -21,13 +21,10 @@ show_downloads: true
 defaults:
   -
     scope:
-      path: ""
+      path: "/pages"
       type: "docs"
     values:
       layout: "default"
-
-nav:
-  - Home: index.md
 
 sidebar:
   - Home: index.md
@@ -51,3 +48,13 @@ plugins:
   - jekyll-seo-tag
   - jekyll-paginate
   - jekyll-sitemap
+
+footer_content: "Copyright &copy; 2025 TaroTarot AI. Distributed under the <a href=\"https://github.com/whoamimi/tarotarot-ai-backend/blob/main/LICENSE\">MIT License</a>."
+footer_social:
+  - title: "GitHub"
+    url: "https://github.com/whoamimi/"
+    icon: "fab fa-github"
+  - title: "Blog"
+    url: "https://mimiphanblog.wordpress.com/"
+    icon: "fas fa-blog"
+
