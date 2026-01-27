@@ -34,14 +34,14 @@ sidebar:
 
 aux_links:
   DataBy AI App:
-    url: https://databy.ai
-    icon: fas fa-robot
+    - url: https://databy.ai
+    - icon: fas fa-robot
   Github:
-    url: https://github.com/whoamimi/databy-ai
-    icon: fab fa-github
+    - url: https://github.com/whoamimi/databy-ai
+    - icon: fab fa-github
   Wordpress:
-    url: https://mimiphanblog.wordpress.com/
-    icon: fas fa-blog
+    - url: https://mimiphanblog.wordpress.com/
+    - icon: fas fa-blog
 
 aux_links_position: top
 aux_links_style: icons
@@ -86,18 +86,6 @@ gh_edit_source: docs
 gh_edit_view_mode: "tree"
 
 defaults:
-  # _posts
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: single
-      author_profile: false
-      read_time: true
-      comments: true
-      share: true
-      related: true
-
   # _pages
   - scope:
       path: ""
