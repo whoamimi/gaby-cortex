@@ -2,7 +2,8 @@
 title: "DataBy AI Docs"
 remote_theme: pmarsceill/just-the-docs
 logo: /assets/logo.svg
-color_scheme: dark
+color_scheme: light
+
 author: Mimi Phan 
 email: phan.mimi@outlook.com 
 markdown: kramdown
@@ -49,7 +50,7 @@ plugins:
   - jekyll-paginate
   - jekyll-sitemap
 
-footer_content: "Copyright &copy; 2025 TaroTarot AI. Distributed under the <a href=\"https://github.com/whoamimi/tarotarot-ai-backend/blob/main/LICENSE\">MIT License</a>."
+footer_content: "Copyright &copy; 2025 DataBy AI. Distributed under the <a href=\"https://github.com/whoamimi/databy-ai/blob/main/LICENSE\">MIT License</a>."
 footer_social:
   - title: "GitHub"
     url: "https://github.com/whoamimi/"

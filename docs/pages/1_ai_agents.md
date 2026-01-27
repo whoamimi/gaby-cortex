@@ -1,6 +1,6 @@
 ---
 
-layout: page
+layout: default
 title: AI Agent Architecture
 
 ---

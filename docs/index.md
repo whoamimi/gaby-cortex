@@ -1,5 +1,5 @@
 ---
-title: DataBy AI Docs
+title: Home
 layout: default 
 
 ---
