@@ -33,15 +33,14 @@ sidebar:
 
 aux_links:
   DataBy AI App:
-    - url: https://databy.ai
-    - icon: fas fa-robot
+    - https://databy.ai
+    - fas fa-robot
   Github:
-    - url: https://github.com/whoamimi/databy-ai
-    - icon: fab fa-github
+    - https://github.com/whoamimi/databy-ai
+    - fab fa-github
   Wordpress:
-    - url: https://mimiphanblog.wordpress.com/
-    - icon: fas fa-blog
-
+    - https://mimiphanblog.wordpress.com/
+    - fas fa-blog
 aux_links_position: top
 aux_links_style: icons
 
