@@ -1,6 +1,6 @@
 
 title: "DataBy AI Docs"
-remote_theme: pages-themes/minimal@v0.2.0
+remote_theme: mmistakes/minimal-mistakes
 logo: /assets/logo.svg
 color_scheme: light
 
