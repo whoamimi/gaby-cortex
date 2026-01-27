@@ -1,6 +1,12 @@
+# _data/navigation.yml
+
 main:
   - title: "Home"
     url: /databy-ai/
+  - title: "AI & Data Science"
+    url: /databy-ai/pages/1_ai_agents/
+  - title: "Docs"
+    url: /databy-ai/docs/
 
 docs:
   - title: Home
