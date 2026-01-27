@@ -2,8 +2,8 @@
 title: "DataBy AI Docs"
 remote_theme: mmistakes/minimal-mistakes
 logo: /assets/logo.svg
-color_scheme: light
 description: "Documentation for DataBy AI"
+minimal_mistakes_skin: "dark"
 
 author: Mimi Phan
 email: phan.mimi@outlook.com
@@ -12,12 +12,6 @@ markdown: kramdown
 highlighter: rouge
 breadcrumbs: true
 heading_anchors: false
-incremental: true
-paginate: 10
-enable_copy_code_button: true
-inline_toc: true
-pagination_previous: "Previous"
-pagination_next: "Next"
 
 url: https://whoamimi.github.io
 baseurl: /databy-ai
@@ -31,9 +25,6 @@ toc: true
 toc_label: "Content"
 toc_icon: "cog"
 classes: wide
-lasyout: default
-minimal_mistakes_skin: "dark"
-
 header:
   title: "DataBy AI Documentation"
   logo: /assets/logo.svg
