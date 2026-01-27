@@ -24,13 +24,12 @@ toc: true
 toc_label: "Content"
 toc_icon: "cog"
 classes: wide
-header:
-  title: "DataBy AI Documentation"
-  logo: /assets/logo.svg
-  tagline: "Blogs on building Autonomous AI Data Agent."
 
 sidebar:
-  nav: "docs"
+  position: left
+  title: "DataBy AI Docs"
+  collapsible: true
+  collapsed_by_default: false
 
 aux_links:
   DataBy AI App:
