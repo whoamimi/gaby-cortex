@@ -1,6 +1,8 @@
 
 title: "DataBy AI Docs"
-theme: jekyll-theme-cayman
+remote_theme: mmistakes/minimal-mistakes
+logo: /assets/logo.svg
+color_scheme: dark
 author: Mimi Phan 
 email: phan.mimi@outlook.com 
 markdown: kramdown
@@ -12,7 +14,9 @@ repository: whoamimi/databy-ai
 
 mermaid:
   version: "10.6.0"
+  theme: "neo-dark"
 
+show_downloads: true
 # Custom CSS for dark theme
 defaults:
   -
@@ -25,11 +29,13 @@ defaults:
 nav:
   - Home: index.md
 
+sidebar:
+  - Home: index.md
+  - AI & Data Science: pages/1_ai_agents.md
+
 aux_links:
-  App:
-    - https://databy.ai
-  Github:
-    - https://github.com/whoamimi/databy-ai
+  App: https://databy.ai
+  Github: https://github.com/whoamimi/databy-ai
 
 exclude:
   - CHANGELOG.md
@@ -41,7 +47,6 @@ exclude:
   - screenshot.png
 
 plugins:
-
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-paginate
