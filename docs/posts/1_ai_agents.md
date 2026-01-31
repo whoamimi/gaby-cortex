@@ -10,21 +10,10 @@ collections:
 - **Content**
 {:toc}
 
-Despite the hyped nature of 'AI Agent' usage in this generation and the pressure that it brings, it extends the current programming paradigm and to current programmers. Whilst building the fundamental or skeletal codebase for my bots, it prompted me to reconsider many designs specific to the following areas:
+Despite the hype surrounding “AI agents” and the pressure that accompanies the trend, they meaningfully extend the contemporary programming paradigm and, in doing so, expand what working programmers can reasonably build. While constructing the foundational—almost skeletal—codebase for my bots, I found myself reconsidering several design choices, especially in the following areas:
 
-- Data system Architectures. The idea that I am not limited to modelling or drafting the format of how these dataset is collected or stored - like in most day-to-day jobs of a data worker, brought me alot of joy.
-- Importance of Logging and traces. In other words, measuring the intensity of my abuse on using decorative functions and classes. There is a fine line between sufficient and over-engineer and unfortunately, I often find myself in the latter more than I intend to.
-
-# **How the module works**
-
-## **Building an Agent**
-
-All AI Agents are built by inheriting `AgentBasement` Object class.
-
-## **Pipelines**
-
-All Pipelines and workflows are built by inheriting `AgentPipeline` which inherits `OrderedDict`. The inheritance between
-
+- Data system architecture. The realization that I’m not confined to the typical constraints of day-to-day data work—merely modeling or drafting how datasets are collected and stored—has been genuinely invigorating.
+- The importance of logging and tracing. Put differently, they force me to quantify how far I push “decorative” functions and classes. There’s a fine line between adequate structure and over-engineering—and, more often than I’d like, I end up on the wrong side of it.
 
 # **From User Event Driven Point-of-view**
 

@@ -130,10 +130,32 @@ python -m unittest discover -s tests -p "test_*.py"
 
 - [ ] ML / AI Workflows
 
-## **Reference**
+## To run Interactively
 
-- [Official Google Cloud Run with FastAPI](<https://docs.cloud.google.com/run/docs/quickstarts/build-and-deploy/deploy-python-fastapi-service#local-shell>)
-- [Official Jupyter Server Rest API Docs](https://jupyter-server.readthedocs.io/en/latest/developers/)
-- [Demo Jupyter Kernel Gateway](https://medium.com/@tabindabhat/basics-of-jupyter-kernel-gateway-a54ddc4fd228)
-- [Demo Unittesting & Integration Testing for Prototypes](https://www.geeksforgeeks.org/software-engineering/software-engineering-prototyping-model/)
-- [Jekyll Docs](https://github.com/daattali/beautiful-jekyll/blob/master/_config.yml)
+Run the following block
+
+```python
+
+import sys
+from pathlib import Path
+import importlib.util
+
+BACKEND = Path("/Users/mimiphan/mimeus-app/databy-ai/backend").resolve()
+assert (BACKEND / "app").is_dir(), f"Expected app/ under {BACKEND}, but it wasn't found."
+
+# Put BACKEND first
+if str(BACKEND) in sys.path:
+    sys.path.remove(str(BACKEND))
+sys.path.insert(0, str(BACKEND))
+
+# Purge any previously imported wrong 'app'
+for k in list(sys.modules.keys()):
+    if k == "app" or k.startswith("app."):
+        del sys.modules[k]
+
+print("sys.path[0]:", sys.path[0])
+print("find_spec('app'):", importlib.util.find_spec("app"))
+print("find_spec('app.src'):", importlib.util.find_spec("app.src"))
+print("find_spec('app.src.agent'):", importlib.util.find_spec("app.src.agent"))
+
+```

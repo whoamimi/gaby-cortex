@@ -3,18 +3,17 @@
 Kaggle Kernel Server Controller. Mounts kernel onto local Jupyter environment for dataset access
 """
 
-import uuid
 import json
 import subprocess
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 from kaggle.api.kaggle_api_extended import KaggleApi
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 from ... import workspace
 from ...utils.woodlogs import setup_logger
 
-logger = setup_logger(__file__)
+logger = setup_logger(__name__)
 
 # Remote Kaggle directories
 KAGGLE_WORKING_DIR = "/kaggle/working/"
@@ -85,7 +84,6 @@ class KaggleKernelMetadata(BaseModel):
             "kernel_sources": self.kernel_sources,
             "model_sources": self.model_sources,
         }
-
 
     def save_metadata_file(self):
         """Get path to kernel-metadata.json file."""

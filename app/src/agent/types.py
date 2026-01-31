@@ -6,6 +6,7 @@ Configures agent's prompts and roles for different stages of operation.
 """
 
 from enum import Enum
+from re import S
 from typing import Dict
 
 ETL_PIPELINE_STAGES = [
@@ -84,7 +85,6 @@ DATA_TRANS_ACTIONS: Dict[str, Dict[str, str]] = {
     },
 }
 
-
 # Session Base Dataset
 class GenerateCodeDtypeConfig(Enum):
     """ Configuration for generating code based on data types. """
@@ -131,31 +131,14 @@ class AgentTabularFields(Enum):
     FACT_TABLE = ["data_field_name", "data_type", "description", "data_type_category", "data_type_subcategory"]
     VALUE_TYPE_TABLE = ["data_field_name", "nested"]
 
-
-class SkeletonAgentInputs(Enum):
-    PLANNER = """Data processing stage instruction: {objective}\nCurrent Dataset Schema Model:\n{dataset_schema}\n"""
-    EXECUTOR = """TODO Task: {current_step}\nCurrent Dataset Schema Model:\n{dataset_schema}\n"""
-    EVALUATOR = """Results from executed task: {results}\nCurrent Dataset Schema Model:\n{dataset_schema}\n"""
-
-class SkeletonAgentResponseTemplate(Enum):
-    PLANNER = "{{'steps': [str, str, str]}}"
-    EXECUTOR = "{{'code': str}}"
-    EVALUATOR = "{{'success': bool, 'feedback': str | null, 'reason': str | null }}"
-
-class SkeletonAgentRole(Enum):
-    PLANNER = "Given the dataset schema model, create a 3 step plan for the following data processing stage. Provide your response in the following JSON format {} where 'steps' is a list of 3 sequential steps to accomplish the task.".format(SkeletonAgentResponseTemplate.PLANNER.value)
-    EXECUTOR = "Given the TODO data engineering task amd the data model schema, provide python code that performs data wrangling operations to manipulate the pandas dataframes. Provide your response in JSON format {} with key `code` containing the python code script with dataframe parameters.".format(SkeletonAgentResponseTemplate.EXECUTOR.value)
-    EVALUATOR = "Evaluate the results from executed task and provide feedback onto whether the task was successful or not. Provide your response in the following JSON format {} where 'success' indicates if the task was completed successfully, 'feedback' provides suggestions for improvement if any and otherwise defaults to null, and 'reason' provides reason for failure if any otherwise leave it as null.".format(SkeletonAgentResponseTemplate.EVALUATOR.value)
-
-
-
-PROFILE_TABULAR_FIELD_META = """
+PROFILE_TABULAR_FIELD_META = f"""
 data_field_name: Name of the data column
 description: Brief description of the data column.
 data_type: Specific data type of the column (e.g., integer, string, date).
-data_type_category: General category of the data type (e.g., numeric, categorical, temporal).
-data_type_subcategory: More specific subcategory if applicable (e.g., continuous, discrete for numeric types).
+data_type_category: General category of the data type {", ".join(DataTypeCategories.parent.value)}.
+data_type_subcategory: More specific subcategory if applicable {", ".join(DataTypeCategories.numerical.value + DataTypeCategories.categorical.value + DataTypeCategories.others.value)}.
 """
+
 MODELLER_TABULAR_FIELD_META = """
 data_field_name: Name of the data column
 nested: Boolean indicating if the field is nested (e.g., JSON, array).
@@ -164,6 +147,33 @@ to_do: Suggested data modelling operation to improve data quality or usability.
 
 TABULAR_FIELD_META = PROFILE_TABULAR_FIELD_META + MODELLER_TABULAR_FIELD_META
 
+BASE_INPUT_DATA_TEMPLATE = """Dataset Profile Summary:
+{data_profile}
+
+Sample Data Preview:
+{data_sample}
+
+"""
+
+class SkeletonAgentInputs(Enum):
+    PLANNER = """Data processing stage instruction: {objective}\nCurrent Dataset Schema Model:\n{dataset_schema}\n"""
+    EXECUTOR = """TODO Task: {current_step}\nCurrent Dataset Schema Model:\n{dataset_schema}\n"""
+    EVALUATOR = """Results from executed task: {results}\nCurrent Dataset Schema Model:\n{dataset_schema}\n"""
+
+class SkeletonAgentResponseTemplate(Enum):
+    PLANNER = "{{'steps': [str, str, str, str, str]}}"
+    EXECUTOR = "{{'code': str}}"
+    EVALUATOR = "{{'success': bool, 'feedback': str | null, 'reason': str | null }}"
+
+class SkeletonAgentResponseTemplateMeta(Enum):
+    PLANNER = "steps: A list of up to 5 sequential steps to accomplish the data processing task."
+    EXECUTOR = "code: A python code script that performs data wrangling operations to manipulate the pandas dataframes."
+    EVALUATOR = "success: A boolean indicating if the task was completed successfully. feedback: Suggestions for improvement if any, otherwise null. reason: Reason for failure if any, otherwise null."
+
+class SkeletonAgentRole(Enum):
+    PLANNER = "Given the dataset profile schema model and description, create a maximum of 5 step plan for the following data processing stage. Provide your response in JSON format {} where {}".format(SkeletonAgentResponseTemplate.PLANNER.value, SkeletonAgentResponseTemplateMeta.PLANNER.value)
+    EXECUTOR = "Given the planned tasks to engineer the a dataset and current targeted stage, provide python code to manipulate the pandas dataframes to achieve the targeted stage. Provide your response in JSON format {} where {}.".format(SkeletonAgentResponseTemplate.EXECUTOR.value, SkeletonAgentResponseTemplateMeta.EXECUTOR.value)
+    EVALUATOR = "Evaluate the results from executed task and provide feedback onto whether the task was successful or not. Provide your response in the following JSON format {} where {}".format(SkeletonAgentResponseTemplate.EVALUATOR.value, SkeletonAgentResponseTemplateMeta.EVALUATOR.value)
 
 class DataAgentResponseTemplate(Enum):
     profiler = "{{'outputs': [{{'data_field_name': str, 'description': str, 'data_type': str, 'description': str, 'data_type_category': str, 'data_type_subcategory': str}}]}}"
@@ -173,16 +183,19 @@ class DataAgentResponseTemplate(Enum):
     OutlierDetection = "{{'outputs': [{{'data_field_name': str, 'outlier_percentage': float, 'detection_method': str, 'handling_action': str}}]}}"
 
 class DataAgentInputsTemplate(Enum):
-    profiler = """Dataset Profile Summary:\n{data_profile}\nSample Data Preview:\n{data_sample}"""
-    modeller = """Dataset Profile Summary:\n{data_profile}"""
-    MissingValuesHandling = """Dataset Profile Summary:\n{data_profile}\nObjective: {objective}\nCurrent Data Issues: {data_issues}"""
-    Deduplication = """Dataset Profile Summary:\n{data_profile}\nObjective: {objective}\nCurrent Data Issues: {data_issues}"""
-    OutlierDetection = """Dataset Profile Summary:\n{data_profile}\nObjective: {objective}\nCurrent Data Issues: {data_issues}"""
+    profiler = BASE_INPUT_DATA_TEMPLATE + "\nObjective: {objective}"
+    modeller = BASE_INPUT_DATA_TEMPLATE
+    MissingValuesHandling = BASE_INPUT_DATA_TEMPLATE
+    Deduplication = BASE_INPUT_DATA_TEMPLATE
+    OutlierDetection = BASE_INPUT_DATA_TEMPLATE
+
+_MD_RESPONSE = "a Github-flavored markdown table with a single header row and pip (|) separators (no extra prose), e.g. | col1 | col2 | ... |. Keep cell values single-line (no pipes/newlines inside cells) so I can parse it directly with a markdown table parser like pandas.read_html()."
+_HTML_RESPONSE = "an HTML table with a single header row (no extra prose), so I can parse it directly with pandas.read_html()."
 
 class DataAgentRoleConfig(Enum):
-    profiler = "Given the dataset's objective and data model summary, Return the description of the data column fields and their data types. Provide your response in the following JSON format {} where 'outputs' is a list of objects containing: {}".format(DataAgentResponseTemplate.profiler.value, TABULAR_FIELD_META.strip())
+    profiler = "Return the description of the data column fields and their data types. Return your response as {} with column fields: {} where {}".format(_HTML_RESPONSE, DataAgentResponseTemplate.profiler.value, PROFILE_TABULAR_FIELD_META.strip())
+    modeller = "Return the dataset values existing data structures and for the current data field column".format(DataAgentResponseTemplate.modeller.value)
 
-    modeller = "Given the dataset's objective, data model summary, and current data issues, suggest data restructuring operations to improve data quality and usability. Provide your response in the following JSON format {} where 'suggested_operations' is a list of 3 recommended data restructuring operations.".format(DataAgentResponseTemplate.modeller.value)
     MissingValuesHandling = (
         "Given the dataset field summary report and the sample values for the respective data fields, for datasets where there exists missing values, analyze the patterns of missingness and recommend appropriate strategies. Return your response in the following JSON format: {}."
     ).format(DataAgentResponseTemplate.MissingValuesHandling.value)

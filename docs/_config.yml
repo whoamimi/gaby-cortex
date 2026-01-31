@@ -28,7 +28,11 @@ aux_links:
 
 aux_links_position: top
 aux_links_style: icons
-
+aux_links_icons:
+  DataBy AI App: fas fa-robot
+  Github: fab fa-github
+  Wordpress: fab fa-wordpress
+  
 exclude:
   - CHANGELOG.md
   - CNAME
@@ -53,7 +57,6 @@ gh_edit_branch: "main"
 gh_edit_source: docs
 gh_edit_view_mode: "tree"
 
-
 collections:
   posts:
     output: true
@@ -69,17 +72,14 @@ just_the_docs:
     min_level: 2
     max_level: 4
   show_toc_on_pages: true
-  show_toc_on_posts: false
+  show_toc_on_posts: true
   show_toc_on_docs: true
   toc_sticky: true
   toc_collapsible: true
-  toc_collapsed_by_default: false
+  toc_collapsed_by_default: true
 
   social_sharing:
     enabled: true
-    twitter_username: whoamimi
-    facebook_app_id: ""
-    linkedin_username: ""
 
   sidebar:
     collapsible: true

@@ -1,4 +1,4 @@
-""" src/playground/local.py
+""" src/playground/jupyter_server.py
 
 Jupyter Kernel Server REST API Connector hosted with local or private spaces.
 https://jupyter-server.readthedocs.io/en/latest/developers/rest-api.html

@@ -1,14 +1,16 @@
 """ src/agent/registry.py
 
 Class for building Agents in this module.
+
+
 """
 
 from __future__ import annotations
 
-from functools import lru_cache
 import pickle
 import uuid
 import datetime
+from mock import DEFAULT
 import pandas as pd
 from enum import Enum
 from pathlib import Path
@@ -18,13 +20,14 @@ from typing import Any, Literal, Tuple, List
 from dataclasses import dataclass, field
 
 from ...utils.woodlogs import setup_logger
-from .hostess import GenAIMessage, GoogleGenAIProvider
+from .hostess import GenAIMessage, GoogleGenAIProvider, DEFAULT_KWARGS
 from .types import AgentTabularFields, DataTypeCategories
 
-logger = setup_logger(__file__)
+logger = setup_logger(__name__)
 
 @dataclass(slots=True)
 class Action:
+    """ Data Model for how Action MetaData is stored for agent. """
     action: str
     proba: float
     space: dict
@@ -41,15 +44,17 @@ class Action:
 
 @dataclass(slots=True)
 class StateMessage:
-    # state agent StateMessages
+    """ Data Model for how State Messages are stored for agent. """
     stage: str
     response: str
+    llm_response: Any | None = None
     whisper_response: Any | None = None
     # inputs
     inputs: GenAIMessage | None = None
     # state env config / llm metadata
     response_id: str | None = None
     model_version: str | None = None
+    decoder_kwargs: dict | None = None
     # agent RL metadata
     action: Action | None = None
     # system traces
@@ -97,11 +102,20 @@ class AgentBasement(ABC):
         """
 
         decode_kwarg = {k: kwargs.get(k, v) for k, v in llm.default.items()} if decode_kwargs else llm.default.copy()
+
         raw_message: dict = self.preprocess(session, **kwargs)
         inputs: GenAIMessage = self._preprocessor(raw_message, **decode_kwarg)
         response = llm(inputs)
         output: StateMessage = self.postprocess(response)
-        return self._postprocessor(inputs, output, session)
+
+        output.sessionId = session.id
+        output.inputs = inputs
+        output.decoder_kwargs = inputs.decoder_kwargs
+        output.model_version = llm.model_id
+        output.response_id = response.response_id if hasattr(response, "response_id") else None
+        output.llm_response = response
+
+        return output, session
 
     def __init_subclass__(cls, prompt: Enum | str, input_format: Enum | str, **kwargs) -> None:
         """ Generic initializer for all Agents built in this module. """
@@ -112,6 +126,7 @@ class AgentBasement(ABC):
 
     def _preprocessor(self, formatted_response: dict, **kwargs):
         """ Generic Preprocessor to format the raw message dict into GenAIMessage format before passing to LLM.  """
+
         if not isinstance(formatted_response, dict): raise TypeError(f"{self.__class__.__qualname__} defined `preprocess` method must return a dict.")
 
         return GenAIMessage(
@@ -119,12 +134,6 @@ class AgentBasement(ABC):
             content=self.input_format.format(**formatted_response),
             decoder_kwargs=kwargs
         )
-
-    def _postprocessor(self, inputs: GenAIMessage, output: StateMessage, session: AgentDataset):
-        """ Generic postprocess method to extract text from LLM response text only. """
-        output.sessionId = session.id
-        output.inputs = inputs
-        return output, session
 
     def extract_text_from_response(self, response: Any):
         """ Generic postprocess method to extract text from LLM response text only. """
@@ -141,14 +150,19 @@ class AgentPipeline(OrderedDict):
         super().__init__()
 
         for k, v in self.__class__.__dict__.items():
-            if isinstance(v, type) and issubclass(v, AgentBasement):
-                self[k] = v()
+            if isinstance(v, type) and (issubclass(v, AgentBasement) or issubclass(v, AgentPipeline)):
+                self[k.lower().strip()] = v()
                 logger.debug(f"Added stage '{k}' to AgentPipeline '{self.__class__.__qualname__}'")
 
     def __init_subclass__(cls, *args, **kwargs) -> None:
         """ Generic initializer for all AgentPipeline built in this module. """
         logger.debug(f"Initialized AgentPipeline subclass: {cls.__qualname__}")
+        cls.label = cls.__class__.__qualname__
         return super().__init_subclass__(*args, **kwargs)
+
+    def __repr__(self) -> str:
+        stage_names = ', '.join(self.keys())
+        return f"{self.__class__.__qualname__} with stages: [{stage_names}]"
 
 @dataclass(slots=True)
 class AgentDataset:
@@ -168,7 +182,6 @@ class AgentDataset:
     # Tabular Reports Config/Utils
     tabularConfig = AgentTabularFields
     tabularUtils = DataTypeCategories
-    flags = []
 
     def __post_init__(self):
         logger.info(f"Dataset initialized for AgentDataset with ID: {self.id} at {self.timestamp}. Size: {self.ds.shape if isinstance(self.ds, pd.DataFrame) else len(self.ds)}")
@@ -222,7 +235,6 @@ class AgentDataset:
 
         return data_stats[AgentTabularFields.SUMMARY.value]
 
-    @lru_cache(maxsize=32)
     def get_data_profiler_string(self):
         """ Returns the data profiler as a string. """
         df: pd.DataFrame = self.get_data_profiler(self.ds)

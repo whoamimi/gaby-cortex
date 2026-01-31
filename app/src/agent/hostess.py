@@ -17,7 +17,7 @@ DEFAULT_KWARGS = {
     "topP": 0.95,
     "topK": 50,
     "candidateCount": 1,
-    "max_output_tokens": 276,
+    "max_output_tokens": 500,
 
 }
 

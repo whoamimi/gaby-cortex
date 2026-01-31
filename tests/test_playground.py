@@ -1,7 +1,7 @@
 # tests/agent/test_playground.py
 
 import unittest
-from app.src.playground.local import JupyterConnector
+from app.src.playground.jupyter_server import JupyterConnector
 
 DEMO_CREATE_NEW_SESSION_RESPONSE = {
     'id': 'eb024af4-6bd7-4c9e-bbcd-5fab540a1fba',

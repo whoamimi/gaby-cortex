@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Data Cleaning Session{% endblock %}
+
+<aside class="sidebar">
+    <h2>Browse through ways to connect dataset to Gaby AI</h2>
+    <form method="POST">
+        <label for="dataset">Upload Dataset:</label>
+        <input type="file" id="dataset" name="dataset">
+        <button type="submit">Submit</button>
+        <label for="huggingface"> Or provide Huggingface Dataset ID:</label>
+        <input type="text" id="huggingface" name="huggingface" placeholder="e.g., username/dataset_name">
+        <button type="submit">Submit</button>
+        <label for="kaggle"> Or provide Kaggle Dataset ID:</label>
+        <input type="text" id="kaggle" name="kaggle" placeholder="e.g., username/dataset_name">
+        <button type="submit">Submit</button>
+        <label for="google_sheets"> Or provide Google Sheets URL:</label>
+        <input type="text" id="google_sheets" name="google_sheets" placeholder="e.g., https://docs.google.com/spreadsheets/d/your_sheet_id">
+        <button type="submit">Submit</button>   
+        <input type="dataTags" id="dataTags" name="dataTags" placeholder="Optional tags for the dataset">   
+        <input type="dataDescription" id="dataDescription" name="dataDescription" placeholder="Optional description for the dataset">
+        <button type="submit">Submit</button>
+    </form>
+</aside>
+
+<main class="main-panel">
+    {% if screening_result %}
+        <section class="results-section">
+            <div class="agent-screen"> </div>
+        </section>
+     {% else %}
+    <h2 class="placeholder">No dataset connected yet. Please upload or provide a dataset to get started.</h2>
+    {% endif %}
+</main>
+
+{% endblock %}

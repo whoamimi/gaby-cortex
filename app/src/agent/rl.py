@@ -2,6 +2,7 @@
 app/src/agent/rl.py
 
 Agent Reinforcement Learning Module for Data Processing Pipelines.
+TODO: Cleanup & Expand documentation.
 
 References:
 https://gibberblot.github.io/rl-notes/single-agent/multi-armed-bandits.html
