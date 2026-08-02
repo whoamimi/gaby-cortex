@@ -1,14 +1,26 @@
-""" app/src/agent/chain.py
-
-Agent Workflow Chains and Pipelines
-"""
-
-from __future__ import annotations
+from abc import abstractmethod
 import sys
 from pathlib import Path
 
+import re
+import json
+import pandas as pd
+from typing import Any, OrderedDict
+
+# from app.src.agent.rl import AgentCortex
+from app.src.agent.hostess import GoogleGenAIProvider
+from app.src.agent.base import AgentDataset, StateMessage, AgentBasement, AgentPipeline
+from app.src.agent.types import (
+    DataAgentInputsTemplate,
+    DataAgentRoleConfig,
+    SkeletonAgentInputs,
+    SkeletonAgentRole,
+)
+
 BACKEND = Path("/Users/mimiphan/mimeus-app/databy-ai/backend").resolve()
-assert (BACKEND / "app").is_dir(), f"Expected app/ under {BACKEND}, but it wasn't found."
+assert (
+    BACKEND / "app"
+).is_dir(), f"Expected app/ under {BACKEND}, but it wasn't found."
 
 # Put BACKEND first
 if str(BACKEND) in sys.path:
@@ -20,33 +32,27 @@ for k in list(sys.modules.keys()):
     if k == "app" or k.startswith("app."):
         del sys.modules[k]
 
-import re, json
-import pandas as pd
-from time import time
-from typing import Any, Callable, OrderedDict
-
-# from app.src.agent.rl import AgentCortex
-from app.src.agent.hostess import GoogleGenAIProvider
-from app.src.agent.base import AgentDataset, StateMessage, AgentBasement, AgentPipeline
-from app.src.agent.types import DataAgentInputsTemplate, DataAgentRoleConfig, SkeletonAgentInputs, SkeletonAgentRole
-
 
 from app.utils.woodlogs import setup_logger
 
 logger = setup_logger(__name__)
 
 _JSON_OBJ = re.compile(r"\{.*\}", re.S)
-_CODE_FENCE_PYTHON_RE = re.compile(r"```(?:python)?\s*(.*?)```", re.DOTALL | re.IGNORECASE)
-_CODE_FENCE_JSON_RE = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL | re.IGNORECASE)
+_CODE_FENCE_PYTHON_RE = re.compile(
+    r"```(?:python)?\s*(.*?)```", re.DOTALL | re.IGNORECASE
+)
+_CODE_FENCE_JSON_RE = re.compile(
+    r"```json\s*(\{.*?\})\s*```", re.DOTALL | re.IGNORECASE
+)
+
 
 def get_response(obj, response: Any, stage_name: str = "planner") -> StateMessage:
-    """ Generic response formatter for Skeleton Agent stages.  """
+    """Generic response formatter for Skeleton Agent stages."""
 
     exc: str | None = None
     txt: str = ""
 
     try:
-
         txt: str = obj.extract_text_from_response(response)
         model_version: str = response.model_version
         response_id: str = response.response_id
@@ -65,8 +71,9 @@ def get_response(obj, response: Any, stage_name: str = "planner") -> StateMessag
             statusCode=(200 if exc is None else 500),
             errorMessage=exc,
             response_id=response_id,
-            model_version=model_version
+            model_version=model_version,
         )
+
 
 def extract_first_json_obj(text: str) -> dict:
     """Extracts the first {...} blob and parses JSON; raises cleanly if absent/invalid."""
@@ -78,10 +85,15 @@ def extract_first_json_obj(text: str) -> dict:
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in model response: {e}") from e
 
+
 class SkeletonAgentPipeline(AgentPipeline):
-    class Planner(AgentBasement, prompt=SkeletonAgentRole.PLANNER, input_format=SkeletonAgentInputs.PLANNER):
+    class Planner(
+        AgentBasement,
+        prompt=SkeletonAgentRole.PLANNER,
+        input_format=SkeletonAgentInputs.PLANNER,
+    ):
         def postprocess(self, response: Any):
-            """ Parses the planner response to list form with json.
+            """Parses the planner response to list form with json.
 
             Args:
                 response (Any): The raw response from the LLM.
@@ -92,8 +104,14 @@ class SkeletonAgentPipeline(AgentPipeline):
                 output = get_response(self, response, "planner")
                 obj = extract_first_json_obj(output.response)
 
-                if not isinstance(obj, dict) or "steps" not in obj or not isinstance(obj["steps"], list):
-                    raise ValueError("Planner response JSON must contain a 'steps' key with a list of steps.")
+                if (
+                    not isinstance(obj, dict)
+                    or "steps" not in obj
+                    or not isinstance(obj["steps"], list)
+                ):
+                    raise ValueError(
+                        "Planner response JSON must contain a 'steps' key with a list of steps."
+                    )
 
                 output.whisper_response = obj
             except Exception as e:
@@ -104,7 +122,7 @@ class SkeletonAgentPipeline(AgentPipeline):
             return output
 
         def preprocess(self, dataset: AgentDataset, inputs, **kwargs):
-            """ Prepares the inputs for requesting plan generation.
+            """Prepares the inputs for requesting plan generation.
 
             Args:
                 dataset (AgentDataset): The dataset context.
@@ -114,39 +132,66 @@ class SkeletonAgentPipeline(AgentPipeline):
 
             """
             if "objective" not in inputs:
-                raise ValueError("Missing 'objective' in inputs for Planner preprocessing.")
+                raise ValueError(
+                    "Missing 'objective' in inputs for Planner preprocessing."
+                )
 
-            return {"dataset_schema": dataset.profiler, "objective": inputs.get("objective")}
+            return {
+                "dataset_schema": dataset.profiler,
+                "objective": inputs.get("objective"),
+            }
 
-    class Executioner(AgentBasement, prompt=SkeletonAgentRole.EXECUTOR, input_format=SkeletonAgentInputs.EXECUTOR):
+    class Executioner(
+        AgentBasement,
+        prompt=SkeletonAgentRole.EXECUTOR,
+        input_format=SkeletonAgentInputs.EXECUTOR,
+    ):
         def preprocess(self, dataset: AgentDataset, inputs, **kwargs):
-            """ Prepares the inputs for requesting code block execution. """
+            """Prepares the inputs for requesting code block execution."""
 
             if "current_step" not in inputs:
-                raise ValueError("Missing 'current_step' in inputs for Executioner preprocessing.")
+                raise ValueError(
+                    "Missing 'current_step' in inputs for Executioner preprocessing."
+                )
 
-            return {"dataset_schema": dataset.profiler, "current_step": inputs.get("current_step")}
+            return {
+                "dataset_schema": dataset.profiler,
+                "current_step": inputs.get("current_step"),
+            }
 
         def postprocess(self, response: Any):
-            """ Retrieves the code block from LLM and execute via sys function. TODO: EXECUTE SCRIPT SAFELY.    """
+            """Retrieves the code block from LLM and execute via sys function. TODO: EXECUTE SCRIPT SAFELY."""
             script_code = get_response(self, response, "executor")
             # 1) PARSE AND EXTRACT CODE BLOCK
             # 2) EXECUTE CODE SAFELY HERE
             # 3) CAPTURE OUTPUT IN ./TMP FOLDER AND RETURN
             return "results"
 
-    class Evaluator(AgentBasement, prompt=SkeletonAgentRole.EVALUATOR, input_format=SkeletonAgentInputs.EVALUATOR):
+    class Evaluator(
+        AgentBasement,
+        prompt=SkeletonAgentRole.EVALUATOR,
+        input_format=SkeletonAgentInputs.EVALUATOR,
+    ):
         def preprocess(self, dataset: AgentDataset, inputs, **kwargs):
             if "results" not in inputs or not isinstance(inputs.get("results"), list):
-                raise ValueError("Missing 'results' in inputs for Evaluator preprocessing.")
+                raise ValueError(
+                    "Missing 'results' in inputs for Evaluator preprocessing."
+                )
 
-            return {"dataset_schema": dataset.profiler, "results": inputs.get("results")}
+            return {
+                "dataset_schema": dataset.profiler,
+                "results": inputs.get("results"),
+            }
 
-        def postprocess(self, response: Any):
+        @abstractmethod
+        def postprocess(self, response: Any) -> StateMessage:
             # TODO: Immediately prompts reflection task to clean up code execution artifacts.
             return get_response(self, response, "evaluator")
 
-    def execute_pipeline(self, inputs: dict, llm: GoogleGenAIProvider, dataset: AgentDataset, **kwargs) -> dict:
+    @abstractmethod
+    def execute_pipeline(
+        self, inputs: dict, llm: GoogleGenAIProvider, dataset: AgentDataset, **kwargs
+    ) -> dict:
         """One pass: planner -> executor steps -> evaluator."""
         traces = {}
 
@@ -156,10 +201,14 @@ class SkeletonAgentPipeline(AgentPipeline):
                 traces[stage] = []
 
             if stage == "executor":
-
                 substep = []
-                for step in prev.whisper_response.get("steps", []):
-                    state: StateMessage = stager(llm=llm, dataset=dataset, inputs={"current_step": step}, **kwargs)
+                for step in prev.whisper_response.get("steps", []):  # type: ignore
+                    state: StateMessage = stager(
+                        llm=llm,
+                        dataset=dataset,
+                        inputs={"current_step": step},
+                        **kwargs,
+                    )
                     substep.append(state)
 
                     print(f"[{stage.upper()}] Step: {step} State: {state}")
@@ -167,7 +216,9 @@ class SkeletonAgentPipeline(AgentPipeline):
                 prev = state
 
             else:
-                state: StateMessage = stager(llm=llm, dataset=dataset, inputs=prev, **kwargs)
+                state: StateMessage = stager(
+                    llm=llm, dataset=dataset, inputs=prev, **kwargs
+                )
                 traces[stage].append(state)
                 prev = state
                 print(f"[{stage.upper()}] State: {state}")
@@ -175,39 +226,54 @@ class SkeletonAgentPipeline(AgentPipeline):
         return traces
 
 
-def execute_cycle(self: AgentPipeline, llm: GoogleGenAIProvider, dataset: AgentDataset, skele: SkeletonAgentPipeline, inputs: dict, **kwargs):
-        traces = {}
+def execute_cycle(
+    self: AgentPipeline,
+    llm: GoogleGenAIProvider,
+    dataset: AgentDataset,
+    skele: SkeletonAgentPipeline,
+    inputs: dict,
+    **kwargs,
+):
+    traces = {}
 
-        try:
+    try:
+        for stage, task in self.items():
+            logger.info(f"Starting stage: {stage}")
 
-            for stage, task in self.items():
-                logger.info(f"Starting stage: {stage}")
+            if stage not in traces:
+                traces[stage] = {}
 
-                if stage not in traces:
-                    traces[stage] = {}
+            traces[stage]["inputs"] = task.preprocess(session=session, **kwargs)
+            traces[stage]["cycle_output"] = skele.execute_pipeline(
+                inputs=traces[stage]["inputs"], llm=llm, dataset=session, **kwargs
+            )
+            traces[stage]["outputs"], session = task.postprocess(
+                cycle_output=traces[stage]["cycle_output"], session=session
+            )
 
-                traces[stage]["inputs"] = task.preprocess(session=session, **kwargs)
-                traces[stage]["cycle_output"] = skele.execute_pipeline(inputs=traces[stage]["inputs"], llm=llm, dataset=session, **kwargs)
-                traces[stage]["outputs"], session = task.postprocess(cycle_output=traces[stage]["cycle_output"], session=session)
+        return traces
 
-            return traces
+    except Exception as e:
+        logger.exception(f"Error in Data Discovery pipeline: {e}")
+        raise e
+    finally:
+        return traces, session
 
-        except Exception as e:
-            logger.exception(f"Error in Data Discovery pipeline: {e}")
-            raise e
-        finally:
-            return traces, session
 
 class DataDiscovery(AgentPipeline):
-    """ Data Discovery Pipeline for profiling and initial data assessment.
+    """Data Discovery Pipeline for profiling and initial data assessment.
 
     Stages:
         1) Profiler: Generates a profile of the dataset.
     """
 
-    class Profiler(AgentBasement, prompt=DataAgentRoleConfig.profiler, input_format=DataAgentInputsTemplate.profiler):
+    class Profiler(
+        AgentBasement,
+        prompt=DataAgentRoleConfig.profiler,
+        input_format=DataAgentInputsTemplate.profiler,
+    ):
         def preprocess(self, session: AgentDataset):
-            """ Prepares the dataset profile and sample for the profiler agent.
+            """Prepares the dataset profile and sample for the profiler agent.
 
             Args:
                 session (AgentDataset): The current session dataset.
@@ -217,13 +283,12 @@ class DataDiscovery(AgentPipeline):
             return dict(
                 data_profile=session.profiler,
                 data_sample=session.ds.head(5).to_string(index=False),
-                objective=self.prompt
+                objective=self.prompt,
             )
 
         def postprocess(self, output: Any):
-            """ Updates the session with profiler results. """
+            """Updates the session with profiler results."""
             try:
-
                 output = get_response(self, output, "profiler")
                 if "```html" in output.response:
                     output.response = output.response.strip("```html")
@@ -231,7 +296,11 @@ class DataDiscovery(AgentPipeline):
                     output.response = output.response.strip("```")
 
                 table = pd.read_html(output.response, header=0)
-                table = table[0] if isinstance(table, list) and len(table) > 0 else pd.DataFrame()
+                table = (
+                    table[0]
+                    if isinstance(table, list) and len(table) > 0
+                    else pd.DataFrame()
+                )
                 output.whisper_response = table
 
             except Exception as e:
@@ -241,11 +310,15 @@ class DataDiscovery(AgentPipeline):
 
             return output
 
-    def execute_pipeline(self, llm: GoogleGenAIProvider, session: AgentDataset, skele: SkeletonAgentPipeline, **kwargs):
-
+    def execute_pipeline(
+        self,
+        llm: GoogleGenAIProvider,
+        session: AgentDataset,
+        skele: SkeletonAgentPipeline,
+        **kwargs,
+    ):
         traces = {}
         try:
-
             profiler = self["profiler"]
             output, update_ss = profiler(llm=llm, dataset=session, **kwargs)
             traces["profiler"] = output
@@ -255,8 +328,9 @@ class DataDiscovery(AgentPipeline):
             logger.exception(f"Error in Data Discovery pipeline: {e}")
             raise e
 
+
 class SessionController:
-    """ Manages the full session lifecycle and orchestrates the agent pipelines.
+    """Manages the full session lifecycle and orchestrates the agent pipelines.
 
     Args:
         dataset (pd.DataFrame): The dataset to be processed.
@@ -283,10 +357,51 @@ class SessionController:
         self.skeleton = SkeletonAgentPipeline()
         self.llm = GoogleGenAIProvider(**kwargs)
         # self.agent = AgentCortex()
-        self.stages = OrderedDict([
-            ("discovery", DataDiscovery())
-        ])
+        self.stages = OrderedDict([("discovery", DataDiscovery())])
         self.traces = {}
+
+    def execute_pipeline(self, **kwargs):
+        """Orchestrates the full session execution through all pipeline stages.
+
+        Executes the data discovery stage to profile and assess the dataset,
+        then proceeds through the skeleton agent pipeline for analysis.
+
+        Args:
+            **kwargs: Additional keyword arguments passed to pipeline stages.
+
+        Returns:
+            dict: Traces from all executed stages.
+
+        Raises:
+            Exception: If any stage execution fails.
+        """
+        try:
+            logger.info("Starting SessionController pipeline execution")
+
+            # Execute discovery stage (profiling)
+            discovery = self.stages["discovery"]
+            traces_discovery, self.session = discovery.execute_pipeline(
+                llm=self.llm, session=self.session, skele=self.skeleton, **kwargs
+            )
+            self.traces["discovery"] = traces_discovery
+            logger.info("Discovery stage completed successfully")
+
+            # Execute skeleton agent pipeline
+            traces_skeleton = self.skeleton.execute_pipeline(
+                inputs={"objective": kwargs.get("objective", "Analyze dataset")},
+                llm=self.llm,
+                dataset=self.session,
+                **kwargs,
+            )
+            self.traces["skeleton"] = traces_skeleton
+            logger.info("Skeleton agent pipeline completed successfully")
+
+            return self.traces
+
+        except Exception as e:
+            logger.exception(f"Error in SessionController pipeline execution: {e}")
+            raise e
+
 
 if __name__ == "__main__":
     logger.debug("Agent Chains module loaded.")
@@ -303,7 +418,9 @@ if __name__ == "__main__":
     df = pd.read_csv(data_path)
     logger.debug(f"Data loaded with shape: {df.shape}")
     ss = SessionController(dataset=df)
-    logger.debug(f"SessionController initialized with Data Stages: {list(ss.stages.keys())}")
+    logger.debug(
+        f"SessionController initialized with Data Stages: {list(ss.stages.keys())}"
+    )
 
     discovery = ss.stages["discovery"]
     profiler = discovery["profiler"]

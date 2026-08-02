@@ -228,3 +228,4 @@ __marimo__/
 
 .env
 demo_scrapbook.ipynb
+scratchpad_*.ipynb
