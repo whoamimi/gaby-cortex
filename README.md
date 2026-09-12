@@ -1,161 +1,113 @@
-# Autonomous AI Agent Backend FastAPI
+# Gaby Cortex
 
-DataBy AI Main Backend.
+[![Status](https://img.shields.io/badge/status-sandbox-orange)](#)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-SSE-009688)](https://fastapi.tiangolo.com/)
 
-## **Features**
+An early decision-engine sandbox for **Gaby**, my self-directed data-cleaning agent: it trials a reward-driven bandit policy for picking a cleaning action without a hand-written prompt, wrapped in a composable, self-registering agent pipeline and streamed live over Server-Sent Events.
 
-- **Server-Sent Events (SSE)**: A unidirectional protocol over standard HTTP where the server pushes updates to the client. The client initiates the connection and listens for a continuous stream of messages with the text/event-stream MIME type.
-- **On-Event Support**:
-  - Kaggle
-  - Google Colab
-  - Hugging Face
-- **Project Management Externel Connections**
-  - Notion
-  - WandB
+## Highlights
 
-## **Workspace Requirements**
+- **Objective**: prove that a data-cleaning agent can select its next action from experience — a dataset's shape — rather than from a scripted or user-written prompt, and stream that reasoning to a client in real time.
+- **Key Feature**:
+  - `AgentCortex` — a bandit-style policy that fingerprints a dataframe's dtype composition into a compact `fieldPattern` key, then reuses the best known action for that pattern or explores uniformly at random; checkpoints persist via pickle.
+  - `PageRanker` — a PageRank implementation (column-stochastic matrix, power iteration, dangling-node handling) trialed as a way to rank candidate fields/actions by importance.
+  - `AgentPipeline` / `AgentBasement` — nested classes auto-register as ordered pipeline stages via `__init_subclass__`, giving a declarative `Planner → Executioner → Evaluator` chain.
+  - A FastAPI `/stream/{id}` endpoint that pushes each pipeline stage's state as an SSE event.
+- **Tech stack**: FastAPI + Uvicorn, Google GenAI SDK (`gemini-2.5-flash-lite`) via a custom provider wrapper, pandas/NumPy for profiling and the PageRank linear algebra, Docker (Cloud Run target), Jupyter-backed "agent playground" kernels (local, Kaggle, EC2/Codespace) for sandboxed code execution.
+- **Evaluation**:
+  - `pytest` + `httpx.AsyncClient`/`ASGITransport` exercise the SSE endpoint in-process;
+  - Data pipelines tested with open source "café sales" dataset on Kaggle.
+- **Results & Conclusion**:
+  - The nested-class, self-registering pipeline pattern is a clean way to compose multi-stage agents and carried forward into the later `databy-socket` sandbox.
+  - The dtype-fingerprint bandit is a workable seed for promptless action selection, but its flat, pickle-persisted policy doesn't yet scale past a handful of field patterns or survive restarts cleanly.
+  - Next: fold the bandit into a proper chain-of-responsibility pipeline with a durable reward store, rather than a standalone policy object.
 
-What is required to work use this repo by tech suites:
+## Project Directory Overview
 
-- Cloud Stack:
-  - Google Cloud Setup and Generative AI Kit.
-- Tech Stack:
-  - Vite/React/Tailwind
-  - Python FastAPI
-- Database Stack:
-  - Firebase Realtime Database.
-  - Google Cloud Bucket.
-- Jupyter Notebook Server - can privately serve with Hugging Face Space for free.
-
-## **Project Directory Overview**
-
-```bash
-# tree -d -L 4 -I '(^|/)\.[^/]+|__pycache__|\.git|\.venv'
-
-├── app                       # Project's directory
-│   ├── config                # Project Configuration Files. `/prod` and `/dev` defines the config files for prod and dev environments, respectively.
-│   │   ├── dev
-│   │   └── prod
-│   ├── src                   # Project's Core modules
-│   │   ├── agent             # Contains base abstract designs to build AI Agents e.g. Generative AI Cloud Providers, Agent Builders, Agent Prompt Pipelines
-│   │   ├── playground        # Contains AI agent's kernels terminal sessions controllers
-│   │   ├── router            # Contains FastAPI Utils e.g. execeptions, dependencies
-│   │   ├── service           # Contains servicing
-│   │   └── tools             # Contains actionable methods accessible by the AI Agents
-│   ├── static                # Static Files to mount onto FastAPI during local development. Note that this is not intended to be used in prod.
-│   │   ├── css
-│   │   └── js
-│   └── utils                 # Contains setup utils for FastAPI REST Endpoints
-└── tests                     # Contains Unittests and pytest cases
+```text
+databy-sse/
+├── app/
+│   ├── main.py                 # FastAPI app + /stream/{id} SSE endpoint
+│   ├── config/                 # dev/prod pipeline.yml
+│   ├── src/
+│   │   ├── agent/
+│   │   │   ├── base.py         # AgentBasement, AgentPipeline, AgentDataset, AgentRLBuilder
+│   │   │   ├── chains.py       # SkeletonAgentPipeline (Planner/Executioner/Evaluator)
+│   │   │   ├── hostess.py      # GoogleGenAIProvider (Gemini wrapper)
+│   │   │   └── rl.py           # AgentCortex (bandit policy), PageRanker
+│   │   ├── playground/         # Jupyter/Kaggle kernel controllers (agent code sandbox)
+│   │   ├── router/             # SessionInput/EventOutput pydantic schemas
+│   │   └── streamer.py         # generate_events() async SSE generator
+│   ├── static/, utils/         # logging, paths, startup
+├── docs/                       # GitHub Pages / Jekyll site
+├── tests/                      # pytest suite (SSE, loader, startup, playground)
+├── scratchpad*.ipynb           # algorithm and pipeline trial notebooks
+├── requirements.txt
+└── Dockerfile
 ```
 
-## **Local Dev Notes**
+## System Architecture
 
-Ways to run application:
-
-```bash
-python -m app.main
-# or for FastAPI
-uvicorn app.main:app --reload
-# or lazy start
-PYTHONPATH=. uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```mermaid
+flowchart LR
+    U[Client] -- POST dataset --> API[FastAPI /stream/id]
+    API --> PL[AgentPipeline: Planner to Executioner to Evaluator]
+    PL --> Cortex[AgentCortex bandit policy]
+    Cortex -- fieldPattern lookup --> Checkpoint[(pickle checkpoint)]
+    PL --> LLM[GoogleGenAIProvider gemini-2.5-flash-lite]
+    PL --> Stream[generate_events async generator]
+    Stream -- SSE --> U
 ```
 
-Note that it is preferrable to run as a module where `app` directory is the root. For example:
+Every pipeline stage shares one execution contract (`AgentBasement.__call__`): `preprocess → format prompt → call LLM → postprocess → StateMessage`. `AgentPipeline` builds its stage order by scanning its own class body for nested `AgentBasement`/`AgentPipeline` subclasses, so a new pipeline is just a new set of nested classes — no manual wiring. `AgentCortex` sits beside this chain as the "which action next" decision point, keyed off each dataset's dtype fingerprint rather than a prompt.
 
-```bash
+## Dev Notes
 
-# Running a script from some child path
-python -m app.src.agent.playground
-```
+- **Requirements**
+  - Python 3.11
+  - A Google GenAI API key (`GOOGLE_API_KEY`) for the Gemini provider
 
-## **Setup Files**
+- **Installation**:
 
-Utility methods for setting up workspace are stored in:
+    ```bash
+    # Clone the repository
+    git clone https://github.com/whoamimi/databy-sse.git
+    cd databy-sse
 
-- `utils/on_startup.py`
-- `utils/loader.py`
-- `utils/paths.py`
+    # Create and activate environment
+    conda create -n databy-cortex python=3.11 -y
+    conda activate databy-cortex
 
+    # Install dependencies
+    pip install -r requirements.txt
+    ```
 
-## **Testing**
+- **To start**:
 
-```bash
-# To run all Unittestings
-python -m unittest discover -s tests -p "test_*.py"
-```
+    ```bash
+    python -m app.main
+    # or, for autoreload during development
+    uvicorn app.main:app --reload
+    ```
 
-## **Core Checklist TODO**
+- **Test**:
 
-**FastAPI**
-- [x] SSE ENDPOINTS
-- [ ] NextJS Connection
-- [x] CORS
+    ```bash
+    python -m unittest discover
+    # or
+    pytest
+    ```
 
-**AI Agentic Architecture**
+## Citation
 
-- [x] Playground: Jupyter Kernel Connection
-- [x] AI Agentic Workflow
-- [x] AI Hosting Service & Providers
-  - [x] Google GenAI Kit
-- [x] AI Agent On-event terminals / kernels via the following backup sessions:
-  - [x] Kaggle
-  - [x] Jupyter Kernel Server (EC2)
-  - [x] Jupyter Kernel Server (Git Codespace)
-  - [ ] (Optional) Cloud Runs e.g. AWS or Google Cloud Run (depends on how I feel)
-- [ ] AI Agent Session
-- [ ] AgentRL Modules
-  - [ ] Experimental Module Workspace
-  - [ ] During Current Session
-  - [ ] Across Different Sessions
-    - [ ] Startup
-    - [ ] Post Completion
-    - [ ] Error Capturing
+If you build on this sandbox as part of the Gaby project, cite it as:
 
-**External Connections**
-
-- [ ] MongoDB
-- [ ] SupaBase
-- [ ] Google Bucket
-- [ ] Google Workspace - Sheets Controller
-
-**Deployment**
-
-- [ ] Setup Workspace in Prod
-- [ ] Setup Env Variables in clouds
-- [ ] CI/CD Pipelines on git push
-- [ ] Docs
-
-## **Extensions**
-
-- [ ] ML / AI Workflows
-
-## To run Interactively
-
-Run the following block
-
-```python
-
-import sys
-from pathlib import Path
-import importlib.util
-
-BACKEND = Path("/Users/mimiphan/mimeus-app/databy-ai/backend").resolve()
-assert (BACKEND / "app").is_dir(), f"Expected app/ under {BACKEND}, but it wasn't found."
-
-# Put BACKEND first
-if str(BACKEND) in sys.path:
-    sys.path.remove(str(BACKEND))
-sys.path.insert(0, str(BACKEND))
-
-# Purge any previously imported wrong 'app'
-for k in list(sys.modules.keys()):
-    if k == "app" or k.startswith("app."):
-        del sys.modules[k]
-
-print("sys.path[0]:", sys.path[0])
-print("find_spec('app'):", importlib.util.find_spec("app"))
-print("find_spec('app.src'):", importlib.util.find_spec("app.src"))
-print("find_spec('app.src.agent'):", importlib.util.find_spec("app.src.agent"))
-
+```bibtex
+@software{mimi2026databycortex,
+  author = {Mimi},
+  title  = {databy-cortex: a promptless action-selection sandbox for the Gaby data-cleaning agent},
+  year   = {2026},
+  url    = {https://github.com/whoamimi/databy-sse}
+}
 ```
