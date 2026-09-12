@@ -1,6 +1,4 @@
-# databy-cortex
-
-*(recommended rename of `databy-sse` — the repo trials a decision "brain," not a transport protocol)*
+# Gaby Cortex
 
 [![Status](https://img.shields.io/badge/status-sandbox-orange)](#)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue)](https://python.org)
@@ -17,7 +15,9 @@ An early decision-engine sandbox for **Gaby**, my self-directed data-cleaning ag
   - `AgentPipeline` / `AgentBasement` — nested classes auto-register as ordered pipeline stages via `__init_subclass__`, giving a declarative `Planner → Executioner → Evaluator` chain.
   - A FastAPI `/stream/{id}` endpoint that pushes each pipeline stage's state as an SSE event.
 - **Tech stack**: FastAPI + Uvicorn, Google GenAI SDK (`gemini-2.5-flash-lite`) via a custom provider wrapper, pandas/NumPy for profiling and the PageRank linear algebra, Docker (Cloud Run target), Jupyter-backed "agent playground" kernels (local, Kaggle, EC2/Codespace) for sandboxed code execution.
-- **Evaluation**: `pytest` + `httpx.AsyncClient`/`ASGITransport` exercise the SSE endpoint in-process; pipeline stages are mock-tested against a synthetic dirty "café sales" dataset with the Gemini client stubbed via `unittest.mock`; `PageRanker` convergence is validated in `scratchpad_algos.ipynb` against hand-built adjacency matrices (identity, hub-and-spoke, chain, cycle, disconnected, dangling-node, sparse-random).
+- **Evaluation**:
+  - `pytest` + `httpx.AsyncClient`/`ASGITransport` exercise the SSE endpoint in-process;
+  - Data pipelines tested with open source "café sales" dataset on Kaggle.
 - **Results & Conclusion**:
   - The nested-class, self-registering pipeline pattern is a clean way to compose multi-stage agents and carried forward into the later `databy-socket` sandbox.
   - The dtype-fingerprint bandit is a workable seed for promptless action selection, but its flat, pickle-persisted policy doesn't yet scale past a handful of field patterns or survive restarts cleanly.
